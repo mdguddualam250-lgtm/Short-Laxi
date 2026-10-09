@@ -7,7 +7,7 @@
 	"styles": {
 		"border": {
 			"top": {
-				"color": "var(--wp--preset--color--contrast)",
+				"color": "var(--wp--preset--color--accent)",
 				"style": "solid",
 				"width": "3px"
 			}
