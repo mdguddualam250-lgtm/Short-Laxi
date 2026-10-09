@@ -1,0 +1,59 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Daylight",
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"slug": "base",
+					"name": "Midnight",
+					"color": "#FFFFFF"
+				},
+				{
+					"slug": "base-2",
+					"name": "Sidebar",
+					"color": "#F9FAFB"
+				},
+				{
+					"slug": "surface",
+					"name": "Card",
+					"color": "#F3F4F6"
+				},
+				{
+					"slug": "surface-2",
+					"name": "Card hover",
+					"color": "#E5E7EB"
+				},
+				{
+					"slug": "contrast",
+					"name": "Text",
+					"color": "#0B1020"
+				},
+				{
+					"slug": "contrast-2",
+					"name": "Secondary text",
+					"color": "#4B5563"
+				},
+				{
+					"slug": "accent",
+					"name": "Gold",
+					"color": "#7A5C00"
+				},
+				{
+					"slug": "border",
+					"name": "Divider",
+					"color": "#E5E7EB"
+				},
+				{
+					"slug": "outline",
+					"name": "Control outline",
+					"color": "#6B7280"
+				}
+			]
+		}
+	},
+	"styles": {
+		"css": ":root{color-scheme:light}"
+	}
+}

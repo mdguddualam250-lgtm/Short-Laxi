@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "shortlaxi/share",
+	"title": "Share Controls",
+	"category": "theme",
+	"description": "Copy link, native share sheet and links to share the current article.",
+	"keywords": [ "share", "social", "copy link" ],
+	"textdomain": "shortlaxi",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {
+		"heading": { "type": "string", "default": "" }
+	},
+	"supports": {
+		"html": false,
+		"spacing": { "margin": true },
+		"interactivity": { "clientNavigation": true }
+	},
+	"editorScript": "shortlaxi-editor-blocks",
+	"render": "file:./render.php"
+}

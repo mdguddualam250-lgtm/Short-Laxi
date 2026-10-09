@@ -1,0 +1,42 @@
+<!-- wp:template-part {"slug":"header","area":"header","tagName":"header","className":"shortlaxi-header"} /-->
+
+<!-- wp:group {"className":"shortlaxi-shell","layout":{"type":"default"}} -->
+<div class="wp-block-group shortlaxi-shell">
+	<!-- wp:template-part {"slug":"sidebar","tagName":"aside","className":"shortlaxi-sidebar"} /-->
+
+	<!-- wp:group {"className":"shortlaxi-content","layout":{"type":"default"}} -->
+	<div class="wp-block-group shortlaxi-content">
+		<!-- wp:group {"tagName":"main","className":"shortlaxi-main","layout":{"type":"constrained"}} -->
+		<main class="wp-block-group shortlaxi-main">
+			<!-- wp:group {"align":"wide","className":"shortlaxi-page-header","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"default"}} -->
+			<div class="wp-block-group alignwide shortlaxi-page-header">
+				<!-- wp:query-title {"type":"search"} /-->
+				<!-- wp:pattern {"slug":"shortlaxi/hidden-search"} /-->
+			</div>
+			<!-- /wp:group -->
+
+			<!-- wp:query {"queryId":3,"query":{"perPage":12,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"align":"wide"} -->
+			<div class="wp-block-query alignwide">
+				<!-- wp:post-template {"className":"shortlaxi-grid","layout":{"type":"grid","columnCount":4,"minimumColumnWidth":"17rem"}} -->
+					<!-- wp:pattern {"slug":"shortlaxi/story-card"} /-->
+				<!-- /wp:post-template -->
+
+				<!-- wp:query-pagination {"paginationArrow":"arrow","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap"}} -->
+					<!-- wp:query-pagination-previous /-->
+					<!-- wp:query-pagination-numbers /-->
+					<!-- wp:query-pagination-next /-->
+				<!-- /wp:query-pagination -->
+
+				<!-- wp:query-no-results -->
+					<!-- wp:pattern {"slug":"shortlaxi/hidden-no-results"} /-->
+				<!-- /wp:query-no-results -->
+			</div>
+			<!-- /wp:query -->
+		</main>
+		<!-- /wp:group -->
+
+		<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->
+	</div>
+	<!-- /wp:group -->
+</div>
+<!-- /wp:group -->

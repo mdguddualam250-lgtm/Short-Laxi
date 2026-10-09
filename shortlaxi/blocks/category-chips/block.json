@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "shortlaxi/category-chips",
+	"title": "Category Chips",
+	"category": "theme",
+	"description": "Horizontally scrolling category filters. The current category is highlighted.",
+	"keywords": [ "categories", "filter", "chips" ],
+	"textdomain": "shortlaxi",
+	"attributes": {
+		"number": { "type": "integer", "default": 20 },
+		"showAll": { "type": "boolean", "default": true }
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": { "margin": true },
+		"interactivity": { "clientNavigation": true }
+	},
+	"editorScript": "shortlaxi-editor-blocks",
+	"render": "file:./render.php"
+}

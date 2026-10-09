@@ -1,0 +1,74 @@
+name: Theme
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Lowest supported ("Requires PHP" in style.css) and current.
+        php: [ '7.4', '8.3' ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: gd
+          coverage: none
+
+      - name: Static theme checks
+        run: php bin/validate.php shortlaxi
+
+  schema:
+    name: theme.json schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate theme.json and style variations
+        run: |
+          curl -fsSL https://schemas.wp.org/trunk/theme.json -o "$RUNNER_TEMP/theme.schema.json"
+          for f in shortlaxi/theme.json $(find shortlaxi/styles -name '*.json'); do
+            npx --yes ajv-cli@5 validate --spec=draft7 --strict=false -s "$RUNNER_TEMP/theme.schema.json" -d "$f"
+          done
+
+  package:
+    name: Package
+    needs: [ validate, schema ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build installable zip
+        run: bin/package.sh
+
+      # Upload this zip via WordPress.com > Appearance > Themes > Add New Theme > Upload Theme.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shortlaxi-theme-zip
+          path: dist/*.zip
+          if-no-files-found: error
+
+      # Theme files at the artifact root, for WordPress.com GitHub Deployments in
+      # "Advanced" mode with destination /wp-content/themes/shortlaxi (Business plan).
+      # WordPress.com reads the artifact named "wpcom"; confirm against its current
+      # GitHub Deployments docs when connecting the repository.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wpcom
+          path: shortlaxi/
+          if-no-files-found: error

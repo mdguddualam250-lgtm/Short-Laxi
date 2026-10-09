@@ -1,0 +1,35 @@
+<!-- wp:template-part {"slug":"header","area":"header","tagName":"header","className":"shortlaxi-header"} /-->
+
+<!-- wp:group {"className":"shortlaxi-shell","layout":{"type":"default"}} -->
+<div class="wp-block-group shortlaxi-shell">
+	<!-- wp:template-part {"slug":"sidebar","tagName":"aside","className":"shortlaxi-sidebar"} /-->
+
+	<!-- wp:group {"className":"shortlaxi-content","layout":{"type":"default"}} -->
+	<div class="wp-block-group shortlaxi-content">
+		<!-- wp:group {"tagName":"main","className":"shortlaxi-main shortlaxi-home","layout":{"type":"constrained"}} -->
+		<main class="wp-block-group shortlaxi-main shortlaxi-home">
+			<!-- wp:pattern {"slug":"shortlaxi/hidden-home-heading"} /-->
+
+			<!-- wp:group {"align":"wide","anchor":"explore","className":"shortlaxi-chips-bar","layout":{"type":"default"}} -->
+			<div id="explore" class="wp-block-group alignwide shortlaxi-chips-bar">
+				<!-- wp:shortlaxi/category-chips /-->
+			</div>
+			<!-- /wp:group -->
+
+			<!-- wp:pattern {"slug":"shortlaxi/front-lead"} /-->
+
+			<!-- wp:pattern {"slug":"shortlaxi/top-stories"} /-->
+
+			<!-- wp:pattern {"slug":"shortlaxi/trending"} /-->
+
+			<!-- wp:pattern {"slug":"shortlaxi/bookmarks-shelf"} /-->
+
+			<!-- wp:pattern {"slug":"shortlaxi/latest-stories"} /-->
+		</main>
+		<!-- /wp:group -->
+
+		<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->
+	</div>
+	<!-- /wp:group -->
+</div>
+<!-- /wp:group -->
