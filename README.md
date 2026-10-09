@@ -3,53 +3,88 @@
 Shortlaxi global editorial website and WordPress theme.
 
 This repository is the source of truth for **Shortlaxi**, a custom, mobile-first
-WordPress block theme for a global English-language publication. The production
-target is **WordPress.com** (`shortlaxi.wordpress.com`).
+WordPress block theme for a global English-language publication. Shortlaxi
+publishes written articles; its interface borrows the familiar content-discovery
+patterns of video apps (top search bar, collapsible sidebar, category chips,
+thumbnail grids, trending and latest feeds) with its own Midnight-and-gold
+identity. The production target is **WordPress.com** (`shortlaxi.wordpress.com`).
 
 ## Repository layout
 
 ```
 .
-├── shortlaxi/                 The theme (this folder is what gets installed)
-│   ├── style.css              Theme header (name, version, requirements)
-│   ├── theme.json             Design system: colours, type, spacing, block styles
-│   ├── functions.php          Stylesheet enqueue, logo support, pattern category
-│   ├── assets/css/theme.css   Small mobile-first enhancements theme.json can't express
-│   ├── templates/             Page templates (home, single, page, archive, search, 404…)
-│   ├── parts/                 Header and footer template parts
-│   ├── patterns/              Translatable block patterns used by templates
-│   ├── styles/night.json      "Night" dark style variation
-│   ├── styles/blocks/         "Kicker" and "Standfirst" block styles
-│   ├── screenshot.png         1200×900 preview shown in Appearance → Themes
-│   └── readme.txt             WordPress theme readme
-├── bin/validate.php           Static checks (no WordPress needed)
-├── bin/package.sh             Builds dist/shortlaxi-<version>.zip from committed files
-└── .github/workflows/theme.yml  CI: validate, schema-check, package
+├── shortlaxi/                    The theme (this folder is what gets installed)
+│   ├── style.css                 Theme header (name, version, requirements)
+│   ├── theme.json                Design tokens: palette, type, spacing, radii, block styles
+│   ├── functions.php             Assets, early sidebar state, includes
+│   ├── inc/
+│   │   ├── navigation.php        Sidebar view links, current item, landmark label
+│   │   ├── queries.php           Query Loop roles (featured, top, latest, trending, related)
+│   │   ├── content.php           Table-of-contents data and matching heading anchors
+│   │   └── blocks.php            Registers theme blocks, shared SVG icons
+│   ├── blocks/                   Server-rendered theme blocks (block.json + render.php)
+│   │   ├── category-chips/       "All" + categories as scrollable chips
+│   │   ├── share/                Copy link, native share, X, Facebook, LinkedIn, WhatsApp, email
+│   │   ├── toc/                  Article table of contents (3+ headings)
+│   │   ├── bookmark-button/      Save/unsave a story (stored in the reader's browser)
+│   │   └── bookmarks/            Reader's saved stories, loaded from the REST API
+│   ├── assets/css/theme.css      Layout, shell, cards and interaction styles
+│   ├── assets/js/shortlaxi.js    Sidebar/drawer, bookmarks, share (vanilla, deferred)
+│   ├── assets/js/editor-blocks.js  Build-free editor previews for theme blocks
+│   ├── assets/images/mark.svg    Brand mark
+│   ├── templates/                home, single, page, archive, search, 404, index,
+│   │                             page-explore, page-latest, page-trending, page-bookmarks
+│   ├── parts/                    header, sidebar, footer
+│   ├── patterns/                 Translatable patterns used by templates
+│   ├── styles/daylight.json      Light style variation
+│   ├── styles/blocks/            "Kicker" and "Standfirst" block styles
+│   ├── screenshot.png            1200×900 preview shown in Appearance → Themes
+│   └── readme.txt                WordPress theme readme
+├── bin/validate.php              Static checks (no WordPress needed)
+├── bin/package.sh                Builds dist/shortlaxi-<version>.zip from committed files
+└── .github/workflows/theme.yml   CI: validate, schema-check, package
 ```
 
 ## Theme overview
 
 | Area | Approach |
 | --- | --- |
-| Type | Block (full site editing) theme, `theme.json` v3, WordPress 7.1+ |
-| Layout | 42rem reading measure, 76rem wide; one column on phones, grids auto-fit up to three columns |
-| Typography | System serif (Charter/Georgia family) for reading, system sans for UI. No web-font downloads |
-| Colour | Paper/Ink/Crimson palette; every text pairing passes WCAG AA (most AAA), also in "Night" |
-| Front page | Lead story + "Top stories" rail, then a paginated "Latest" grid (skips the first five) |
-| Articles | Breadcrumbs, section kicker, headline, byline with reading time, wide featured image, topics, author box, previous/next, comments, "More from Shortlaxi" |
-| Accessibility | Skip link, single `h1` per view, visible focus rings, reduced-motion support, no horizontal scroll at 375px |
-| Editing | All copy lives in PHP patterns (translatable); templates are editable in the Site Editor |
+| Type | Block (full site editing) theme, `theme.json` v3, WordPress 7.1+, no plugins or build step |
+| Shell | Sticky top bar (menu, logo, centred search); sidebar with Home, Explore, Latest Articles, Trending, Bookmarks and Categories |
+| Responsive | Phone: compact bar, search toggle, drawer menu, one-column feed. Tablet (768px+): wide search, drawer, 2–3 columns. Desktop (1024px+): persistent sidebar that collapses to an icon rail (remembered), up to 4 columns |
+| Colour | Midnight `#0B1020`, sidebar `#111827`, cards `#172033`, gold `#D4AF37`, text `#F9FAFB` / `#9CA3AF`. All text pairs pass WCAG AA (most AAA). *Daylight* variation for a light site |
+| Typography | System sans for UI and headlines, system serif for article body (1.1875rem / 1.75). No web-font downloads |
+| Front page | Category chips → featured story → top-stories grid → ranked trending row → "Saved for later" shelf → paginated latest articles (no-reload paging) |
+| Cards | 16:9 image, category, title (2 lines), excerpt (2 lines), date, reading time, bookmark; whole card clickable |
+| Articles | Large image, breadcrumbs, category, title, byline with avatar/date/reading time, bookmark + share, table of contents, body, topics, share row, author box, related articles (same category), comments |
+| Accessibility | Skip link, one `h1` per view, landmarks, gold focus rings, modal drawer with focus trap and Escape, `aria-pressed`/`aria-current`, live-region announcements, reduced-motion support, no horizontal overflow from 320px to 2560px |
 
-Editors get two extra block styles: **Kicker** (small uppercase section label
-with a top rule, for headings/paragraphs) and **Standfirst** (larger intro
-paragraph under a headline).
+### How the feeds choose stories
+
+All feeds are WordPress Query Loops over real posts. Each is tagged with a
+`shortlaxiRole` that `inc/queries.php` uses to shape the query:
+
+- **Featured**: the newest *sticky* post (Posts → Edit → "Stick to the top of the blog"),
+  or the newest post when nothing is sticky.
+- **Top stories / Latest articles**: newest posts, never repeating the featured story.
+- **Trending**: most comments first, newest as tie-break. To rank by real traffic,
+  return an ordered list of post IDs from the `shortlaxi_trending_post_ids` filter
+  (for example from Jetpack Stats on WordPress.com).
+- **Related articles**: same category as the article being read, falling back to recent posts.
+
+### Bookmarks
+
+Readers can save stories with the bookmark button. Saved IDs live in the reader's
+browser (`localStorage`); no account, cookie banner or plugin is involved. The
+Bookmarks page and the home "Saved for later" shelf load those stories from the
+public REST API.
 
 ## Develop and validate
 
 Requirements: PHP 7.4+ (and `git` for packaging).
 
 ```sh
-php bin/validate.php      # PHP lint, JSON, headers, pattern/part references, screenshot size
+php bin/validate.php      # PHP + JS syntax, JSON, headers, pattern/part/block references, screenshot
 bin/package.sh            # validates, then writes dist/shortlaxi-<version>.zip
 ```
 
@@ -96,17 +131,30 @@ repository are not removed from the site automatically.
 ## After activating: one-time site setup
 
 1. **Categories**: create the sections (for example World, Business, Technology,
-   Climate, Culture, Opinion). The footer "Sections" list shows them automatically.
-2. **Menus**: in **Appearance → Editor → Navigation**, create a *Primary* menu
-   (section links) and a *Footer* menu (About, Contact, Editorial Standards,
-   Privacy). Then in **Patterns → Header / Footer**, select each navigation block
-   and pick its menu. Until then, both fall back to a list of pages.
-3. **Reading**: leave **Settings → Reading → Your homepage displays** on
-   *Your latest posts* to use the editorial front page.
-4. **Identity**: set the site title, tagline and (optionally) a logo and site icon.
-5. **Posts**: give every story a featured image (cards use 3:2, the lead 16:9) and a
-   hand-written excerpt (it becomes the card summary).
-6. **Optional**: try the *Night* variation in **Appearance → Editor → Styles**.
+   Climate, Culture, Opinion). Chips, the sidebar and Explore pick them up automatically;
+   chips are ordered by number of posts.
+2. **View pages**: create four empty pages with these slugs. WordPress applies the
+   matching template automatically, and the sidebar links switch to them:
+
+   | Page title | Slug | Shows |
+   | --- | --- | --- |
+   | Explore | `explore` | Category tiles and top stories |
+   | Latest Articles | `latest` | Every article, newest first, paginated |
+   | Trending | `trending` | Ranked most-discussed articles |
+   | Bookmarks | `bookmarks` | The reader's saved articles |
+
+   Until a page exists, its sidebar link jumps to the matching section of the front page.
+3. **Footer menu**: in **Appearance → Editor → Navigation**, create a *Footer* menu
+   (About, Contact, Editorial Standards, Privacy) and select it in the footer's
+   navigation block. Until then it lists all pages.
+4. **Reading**: leave **Settings → Reading → Your homepage displays** on
+   *Your latest posts* to use the discovery front page.
+5. **Identity**: set the site title and tagline. Uploading a logo replaces the gold
+   "S" mark and wordmark in the top bar.
+6. **Posts**: give every story a 16:9 featured image (1600×900 or larger) and a
+   hand-written excerpt (the card summary). Mark one story sticky to feature it.
+   Insert the **Sources and references** pattern at the end of reported pieces.
+7. **Optional**: switch to the *Daylight* variation in **Appearance → Editor → Styles**.
 
 Changes made in the Site Editor are stored in the database and override the theme
 files. To get updated theme templates later, use **Reset** on the edited
@@ -114,7 +162,8 @@ template, or copy the change back into this repository.
 
 ## Roadmap
 
+- Rank Trending by real traffic via `shortlaxi_trending_post_ids` (Jetpack Stats)
 - Bundle self-hosted web fonts (via `theme.json` `fontFace`) once the brand is chosen
+- "Load more" button as an alternative to numbered pagination
 - Section front template (`category.html`) with a lead story per category
 - Newsletter sign-up pattern (Jetpack Subscribe block on WordPress.com)
-- "Live"/"Analysis"/"Opinion" post labels and an opinion byline variant

@@ -175,7 +175,62 @@ foreach ( $theme_json['customTemplates'] ?? array() as $template ) {
 	}
 }
 
-// 7. Screenshot.
+// 7. Theme blocks: metadata, render files and every reference from templates/patterns.
+$theme_blocks = array();
+foreach ( theme_files( $theme_dir, '/^blocks\/[^\/]+\/block\.json$/' ) as $rel ) {
+	++$checks;
+	$meta = json_decode( (string) file_get_contents( "$theme_dir/$rel" ), true );
+	$dir  = dirname( $rel );
+	if ( ! is_array( $meta ) || empty( $meta['name'] ) ) {
+		fail( "$rel is missing a block name." );
+		continue;
+	}
+	if ( 0 !== strpos( $meta['name'], "$text_domain/" ) ) {
+		fail( "$rel block name \"{$meta['name']}\" should start with \"$text_domain/\"." );
+	}
+	if ( 3 !== ( $meta['apiVersion'] ?? 0 ) ) {
+		fail( "$rel should use apiVersion 3." );
+	}
+	if ( isset( $meta['render'] ) && 0 === strpos( $meta['render'], 'file:' ) && ! file_exists( "$theme_dir/$dir/" . substr( $meta['render'], 7 ) ) ) {
+		fail( "$rel points to a missing render file." );
+	}
+	$theme_blocks[ $meta['name'] ] = $rel;
+}
+foreach ( theme_files( $theme_dir, '/^(templates|parts|patterns)\/.+\.(html|php)$/' ) as $rel ) {
+	if ( preg_match_all( '/<!-- wp:(' . preg_quote( $text_domain, '/' ) . '\/[a-z0-9-]+)/', (string) file_get_contents( "$theme_dir/$rel" ), $m ) ) {
+		foreach ( array_unique( $m[1] ) as $name ) {
+			++$checks;
+			if ( ! isset( $theme_blocks[ $name ] ) ) {
+				fail( "$rel uses unregistered theme block \"$name\"." );
+			}
+		}
+	}
+}
+
+// 8. Template parts declared in theme.json exist.
+foreach ( $theme_json['templateParts'] ?? array() as $part ) {
+	++$checks;
+	if ( ! file_exists( "$theme_dir/parts/{$part['name']}.html" ) ) {
+		fail( "theme.json declares template part {$part['name']} but parts/{$part['name']}.html is missing." );
+	}
+}
+
+// 9. JavaScript syntax (when Node.js is available).
+$node = trim( (string) shell_exec( 'command -v node 2>/dev/null' ) );
+foreach ( theme_files( $theme_dir, '/\.js$/' ) as $rel ) {
+	if ( '' === $node ) {
+		echo "Note: Node.js not found; skipped syntax check of $rel\n";
+		continue;
+	}
+	++$checks;
+	$out = array();
+	exec( escapeshellarg( $node ) . ' --check ' . escapeshellarg( "$theme_dir/$rel" ) . ' 2>&1', $out, $code );
+	if ( 0 !== $code ) {
+		fail( "JavaScript syntax error in $rel: " . implode( ' ', $out ) );
+	}
+}
+
+// 10. Screenshot.
 ++$checks;
 $shot = @getimagesize( "$theme_dir/screenshot.png" );
 if ( ! $shot ) {
