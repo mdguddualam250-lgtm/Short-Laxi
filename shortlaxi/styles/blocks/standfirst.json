@@ -1,0 +1,14 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"title": "Standfirst",
+	"slug": "standfirst",
+	"blockTypes": [ "core/paragraph" ],
+	"styles": {
+		"color": { "text": "var:preset|color|contrast-2" },
+		"typography": {
+			"fontSize": "var:preset|font-size|large",
+			"lineHeight": "var(--wp--custom--line-height--snug)"
+		}
+	}
+}

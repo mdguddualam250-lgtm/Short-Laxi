@@ -1,0 +1,128 @@
+/*
+ * Shortlaxi enhancements.
+ *
+ * Mobile-first: base rules target small screens; min-width queries add to them.
+ * Keep this file small; prefer theme.json for anything it can express.
+ */
+
+/* Text rendering and readable links. */
+body {
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+a {
+	text-decoration-thickness: 0.06em;
+	text-underline-offset: 0.18em;
+}
+
+/* Visible, consistent keyboard focus. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: 2px solid var(--wp--preset--color--accent);
+	outline-offset: 2px;
+}
+
+/* Images never overflow narrow viewports. */
+img {
+	height: auto;
+	max-width: 100%;
+}
+
+/* Long words and URLs wrap instead of forcing horizontal scroll on phones. */
+.wp-block-post-title,
+.wp-block-post-content {
+	overflow-wrap: break-word;
+}
+
+.wp-block-post-title {
+	text-wrap: balance;
+}
+
+/* Masthead rule under the header. */
+.shortlaxi-masthead {
+	border-bottom: 1px solid var(--wp--preset--color--border);
+}
+
+/* Story lists: hairline rules between items instead of large gaps. */
+.shortlaxi-story-list > li + li {
+	border-top: 1px solid var(--wp--preset--color--border);
+	padding-top: var(--wp--preset--spacing--30);
+}
+
+/* Byline items separated by a middot. */
+.shortlaxi-byline > * + *::before {
+	color: var(--wp--preset--color--contrast-2);
+	content: "\00B7";
+	margin-inline-end: 0.5em;
+}
+
+/* Mobile menu overlay: left-aligned, larger tap targets (the header bar itself stays right-aligned). */
+.wp-block-navigation__responsive-container.is-menu-open,
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation {
+	--navigation-layout-justification-setting: flex-start;
+	--navigation-layout-justify: flex-start;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open {
+	padding-inline: var(--wp--preset--spacing--40);
+}
+
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item {
+	font-size: var(--wp--preset--font-size--large);
+}
+
+/* A visually hidden first heading should not add block-gap space above the next section. */
+.screen-reader-text:first-child + * {
+	margin-block-start: 0;
+}
+
+/* Footer section list: plain, compact links that match the navigation column. */
+.shortlaxi-footer-list {
+	font-family: var(--wp--preset--font-family--sans);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.shortlaxi-footer-list li + li {
+	margin-top: var(--wp--preset--spacing--20);
+}
+
+.shortlaxi-footer-list a {
+	text-decoration: none;
+}
+
+.shortlaxi-footer-list a:hover,
+.shortlaxi-footer-list a:focus-visible {
+	text-decoration: underline;
+}
+
+/* Pagination numbers need breathing room to be tappable. */
+.wp-block-query-pagination-numbers {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--20);
+}
+
+.wp-block-query-pagination-numbers .page-numbers {
+	min-width: 2.75rem;
+	padding: 0.5rem 0;
+	text-align: center;
+}
+
+/* Search block: square edges to match buttons. */
+.wp-block-search__input {
+	border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+	}
+}
