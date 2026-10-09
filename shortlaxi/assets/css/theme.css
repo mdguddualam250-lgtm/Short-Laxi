@@ -1,14 +1,38 @@
 /*
- * Shortlaxi enhancements.
+ * Shortlaxi — app-style editorial layout.
  *
- * Mobile-first: base rules target small screens; min-width queries add to them.
- * Keep this file small; prefer theme.json for anything it can express.
+ * Mobile-first: base rules target phones; min-width queries add the tablet rail
+ * and the desktop sidebar. Design tokens come from theme.json; this file only
+ * holds layout and interaction styles that theme.json cannot express.
+ *
+ * Breakpoints: 48rem (768px) wide search · 64rem (1024px) persistent sidebar.
  */
 
-/* Text rendering and readable links. */
+:root {
+	--shortlaxi-header-h: var(--wp--custom--shell--header-height, 3.5rem);
+	--shortlaxi-admin-bar: var(--wp-admin--admin-bar--height, 0px);
+	--shortlaxi-sidebar-w: var(--wp--custom--shell--sidebar-width, 15rem);
+	--shortlaxi-radius: var(--wp--custom--radius--medium, 12px);
+	--shortlaxi-icon-home: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z%22/%3E%3C/svg%3E");
+	--shortlaxi-icon-explore: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22/%3E%3Cpath d=%22m15.5 8.5-2 5-5 2 2-5z%22/%3E%3C/svg%3E");
+	--shortlaxi-icon-latest: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22/%3E%3Cpath d=%22M12 7v5l3 2%22/%3E%3C/svg%3E");
+	--shortlaxi-icon-trending: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.5 1.5 1.5 2.5 2.5 2.5-1-3 0-6 .5-8z%22/%3E%3C/svg%3E");
+	--shortlaxi-icon-bookmarks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z%22/%3E%3C/svg%3E");
+	--shortlaxi-icon-hash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d=%22M5 9h14M5 15h14M10 4 8 20M16 4l-2 16%22/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------ *
+ * Base
+ * ------------------------------------------------------------------ */
+html {
+	scroll-padding-top: calc(var(--shortlaxi-header-h) + var(--shortlaxi-admin-bar) + 1rem);
+	color-scheme: dark;
+}
+
 body {
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
+	overflow-x: clip;
 }
 
 a {
@@ -16,19 +40,21 @@ a {
 	text-underline-offset: 0.18em;
 }
 
-/* Visible, consistent keyboard focus. */
+::selection {
+	background: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--base);
+}
+
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
 	outline: 2px solid var(--wp--preset--color--accent);
 	outline-offset: 2px;
 }
 
-/* Images never overflow narrow viewports. */
 img {
 	height: auto;
 	max-width: 100%;
 }
 
-/* Long words and URLs wrap instead of forcing horizontal scroll on phones. */
 .wp-block-post-title,
 .wp-block-post-content {
 	overflow-wrap: break-word;
@@ -38,85 +64,1309 @@ img {
 	text-wrap: balance;
 }
 
-/* Masthead rule under the header. */
-.shortlaxi-masthead {
-	border-bottom: 1px solid var(--wp--preset--color--border);
+/* Root block gap must not push the shell away from the sticky header. */
+.wp-site-blocks > .shortlaxi-shell,
+.shortlaxi-shell > *,
+.shortlaxi-content > footer {
+	margin-block: 0;
 }
 
-/* Story lists: hairline rules between items instead of large gaps. */
-.shortlaxi-story-list > li + li {
+/* ------------------------------------------------------------------ *
+ * Top bar
+ * ------------------------------------------------------------------ */
+.shortlaxi-header {
+	background: color-mix(in srgb, var(--wp--preset--color--base) 94%, transparent);
+	border-bottom: 1px solid var(--wp--preset--color--border);
+	position: sticky;
+	top: var(--shortlaxi-admin-bar);
+	z-index: 50;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+	.shortlaxi-header {
+		backdrop-filter: saturate(140%) blur(12px);
+	}
+}
+
+.shortlaxi-topbar {
+	gap: var(--wp--preset--spacing--30);
+	min-height: var(--shortlaxi-header-h);
+	padding-inline: var(--wp--custom--shell--gutter);
+	position: relative;
+}
+
+.shortlaxi-topbar__start {
+	flex-shrink: 0;
+}
+
+.shortlaxi-topbar__end {
+	flex-shrink: 0;
+	margin-inline-start: auto;
+}
+
+.shortlaxi-menu-toggle,
+.shortlaxi-drawer-close {
+	align-items: center;
+	background: transparent;
+	border: 0;
+	border-radius: var(--wp--custom--radius--pill);
+	color: var(--wp--preset--color--contrast);
+	cursor: pointer;
+	display: inline-flex;
+	height: 2.5rem;
+	justify-content: center;
+	padding: 0;
+	width: 2.5rem;
+}
+
+.shortlaxi-menu-toggle[hidden] {
+	display: none;
+}
+
+.shortlaxi-menu-toggle:hover,
+.shortlaxi-drawer-close:hover {
+	background: var(--wp--preset--color--surface-2);
+}
+
+/* Wordmark with the gold brand mark. Hidden when a custom logo is set. */
+.shortlaxi-brand a {
+	align-items: center;
+	display: inline-flex;
+	gap: 0.5rem;
+	white-space: nowrap;
+}
+
+.shortlaxi-brand a::before {
+	aspect-ratio: 4 / 3;
+	background: url(../images/mark.svg) center / contain no-repeat;
+	content: "";
+	flex-shrink: 0;
+	width: 1.75rem;
+}
+
+.shortlaxi-topbar__start:has(.wp-block-site-logo img) .shortlaxi-brand {
+	display: none;
+}
+
+/* Search: a prominent pill on tablet and desktop, an icon toggle on phones. */
+.shortlaxi-search .wp-block-search__inside-wrapper {
+	background: var(--wp--preset--color--base-2);
+	border: 1px solid var(--wp--preset--color--outline);
+	border-radius: var(--wp--custom--radius--pill);
+	overflow: hidden;
+	padding: 0;
+}
+
+.shortlaxi-search .wp-block-search__input {
+	background: transparent;
+	border: 0;
+	color: var(--wp--preset--color--contrast);
+	min-height: 2.5rem;
+	padding: 0 1rem;
+}
+
+.shortlaxi-search .wp-block-search__input::placeholder {
+	color: var(--wp--preset--color--contrast-2);
+	opacity: 1;
+}
+
+.shortlaxi-search .wp-block-search__button {
+	background: var(--wp--preset--color--surface);
+	border: 0;
+	border-inline-start: 1px solid var(--wp--preset--color--outline);
+	border-radius: 0;
+	color: var(--wp--preset--color--contrast);
+	margin: 0;
+	min-width: 3.5rem;
+	padding: 0 1rem;
+}
+
+.shortlaxi-search .wp-block-search__button:hover {
+	background: var(--wp--preset--color--surface-2);
+}
+
+.shortlaxi-search .wp-block-search__inside-wrapper:focus-within {
+	border-color: var(--wp--preset--color--accent);
+}
+
+.shortlaxi-search--wide {
+	display: none;
+}
+
+.shortlaxi-search--compact.wp-block-search__searchfield-hidden .wp-block-search__inside-wrapper {
+	background: transparent;
+	border-color: transparent;
+}
+
+.shortlaxi-search--compact .wp-block-search__button {
+	background: transparent;
+	border: 0;
+	border-radius: var(--wp--custom--radius--pill);
+	height: 2.5rem;
+	min-width: 2.5rem;
+	padding: 0;
+}
+
+/* Expanded compact search covers the bar, like a mobile app search. */
+.shortlaxi-search--compact:not(.wp-block-search__searchfield-hidden) .wp-block-search__inside-wrapper {
+	inset: 0.5rem var(--wp--custom--shell--gutter);
+	position: absolute;
+	width: auto !important;
+	z-index: 2;
+}
+
+@media (min-width: 48rem) {
+	/* Brand | centred search | spare column, so the search stays centred like a video app. */
+	.shortlaxi-header .shortlaxi-topbar {
+		display: grid;
+		grid-template-columns: minmax(max-content, 1fr) minmax(0, 40rem) minmax(0, 1fr);
+	}
+
+	.shortlaxi-search--wide {
+		display: block;
+		margin: 0;
+		width: 100%;
+	}
+
+	.shortlaxi-topbar > .shortlaxi-topbar__end {
+		display: none;
+	}
+}
+
+/* ------------------------------------------------------------------ *
+ * Shell: sidebar + content
+ * ------------------------------------------------------------------ */
+.shortlaxi-content {
+	min-width: 0;
+}
+
+.shortlaxi-sidebar {
+	background: var(--wp--preset--color--base-2);
+	color: var(--wp--preset--color--contrast);
+}
+
+.shortlaxi-sidebar__inner {
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--20);
+}
+
+.shortlaxi-drawer-close {
+	display: none;
+}
+
+/* Phones and tablets: off-canvas drawer opened by the menu button. */
+@media (max-width: 63.99rem) {
+	.shortlaxi-js .shortlaxi-sidebar {
+		bottom: 0;
+		box-shadow: 0 0 2rem rgb(0 0 0 / 0.5);
+		left: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		position: fixed;
+		top: var(--shortlaxi-admin-bar);
+		transform: translateX(-100%);
+		transition: transform 0.25s ease, visibility 0s linear 0.25s;
+		visibility: hidden;
+		width: min(18rem, 85vw);
+		z-index: 100;
+	}
+
+	.shortlaxi-drawer-open .shortlaxi-sidebar {
+		transform: none;
+		transition: transform 0.25s ease;
+		visibility: visible;
+	}
+
+	.shortlaxi-drawer-open .shortlaxi-drawer-close {
+		display: inline-flex;
+		margin: var(--wp--preset--spacing--20) var(--wp--preset--spacing--20) 0;
+	}
+
+	.shortlaxi-scrim {
+		background: rgb(0 0 0 / 0.6);
+		inset: 0;
+		opacity: 0;
+		pointer-events: none;
+		position: fixed;
+		transition: opacity 0.25s ease;
+		z-index: 90;
+	}
+
+	.shortlaxi-drawer-open .shortlaxi-scrim {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.shortlaxi-drawer-open body {
+		overflow: hidden;
+	}
+
+	/* Without JavaScript the primary links stay reachable at the top of the page. */
+	html:not(.shortlaxi-js) .shortlaxi-sidebar__section {
+		display: none;
+	}
+}
+
+/* Desktop: persistent sidebar that collapses to an icon rail. */
+@media (min-width: 64rem) {
+	.shortlaxi-shell {
+		/* Paint the sidebar column full height, even where the sticky sidebar ends. */
+		background: linear-gradient(to right, var(--wp--preset--color--base-2) var(--shortlaxi-sidebar-w), transparent 0);
+		display: grid;
+		grid-template-columns: var(--shortlaxi-sidebar-w) minmax(0, 1fr);
+	}
+
+	.shortlaxi-sidebar-collapsed {
+		--shortlaxi-sidebar-w: var(--wp--custom--shell--rail-width, 4.75rem);
+	}
+
+	.shortlaxi-sidebar {
+		align-self: start;
+		height: calc(100vh - var(--shortlaxi-header-h) - var(--shortlaxi-admin-bar));
+		overflow-y: auto;
+		position: sticky;
+		scrollbar-width: thin;
+		top: calc(var(--shortlaxi-header-h) + var(--shortlaxi-admin-bar));
+	}
+
+	.shortlaxi-scrim {
+		display: none;
+	}
+}
+
+/* Primary destinations. */
+.shortlaxi-sidenav,
+.shortlaxi-sidenav .wp-block-navigation__container {
+	align-items: stretch;
+	width: 100%;
+}
+
+.shortlaxi-sidenav .wp-block-navigation-item {
+	width: 100%;
+}
+
+.shortlaxi-sidenav .wp-block-navigation-item__content {
+	align-items: center;
+	border-radius: var(--wp--custom--radius--small);
+	display: flex;
+	gap: 1.25rem;
+	padding: 0.625rem 0.75rem;
+	width: 100%;
+}
+
+.shortlaxi-sidenav .wp-block-navigation-item__content::before {
+	background: currentColor;
+	content: "";
+	flex-shrink: 0;
+	height: 1.375rem;
+	-webkit-mask: var(--shortlaxi-icon) center / contain no-repeat;
+	mask: var(--shortlaxi-icon) center / contain no-repeat;
+	width: 1.375rem;
+}
+
+.shortlaxi-view-home { --shortlaxi-icon: var(--shortlaxi-icon-home); }
+.shortlaxi-view-explore { --shortlaxi-icon: var(--shortlaxi-icon-explore); }
+.shortlaxi-view-latest { --shortlaxi-icon: var(--shortlaxi-icon-latest); }
+.shortlaxi-view-trending { --shortlaxi-icon: var(--shortlaxi-icon-trending); }
+.shortlaxi-view-bookmarks { --shortlaxi-icon: var(--shortlaxi-icon-bookmarks); }
+
+.shortlaxi-sidenav .wp-block-navigation-item__content:hover {
+	background: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--contrast);
+}
+
+.shortlaxi-sidenav .current-menu-item > .wp-block-navigation-item__content {
+	background: var(--wp--preset--color--surface-2);
+	font-weight: 700;
+}
+
+.shortlaxi-sidenav .current-menu-item > .wp-block-navigation-item__content::before {
+	background: var(--wp--preset--color--accent);
+}
+
+/* Categories list in the sidebar. */
+.shortlaxi-sidebar__section {
 	border-top: 1px solid var(--wp--preset--color--border);
+	margin-top: var(--wp--preset--spacing--30);
 	padding-top: var(--wp--preset--spacing--30);
 }
 
-/* Byline items separated by a middot. */
-.shortlaxi-byline > * + *::before {
+.shortlaxi-sidebar__heading {
 	color: var(--wp--preset--color--contrast-2);
-	content: "\00B7";
-	margin-inline-end: 0.5em;
+	font-size: var(--wp--preset--font-size--x-small);
+	letter-spacing: var(--wp--custom--letter-spacing--kicker);
+	margin: 0 0 var(--wp--preset--spacing--20);
+	padding-inline: 0.75rem;
+	text-transform: uppercase;
 }
 
-/* Mobile menu overlay: left-aligned, larger tap targets (the header bar itself stays right-aligned). */
-.wp-block-navigation__responsive-container.is-menu-open,
-.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation {
-	--navigation-layout-justification-setting: flex-start;
-	--navigation-layout-justify: flex-start;
-}
-
-.wp-block-navigation__responsive-container.is-menu-open {
-	padding-inline: var(--wp--preset--spacing--40);
-}
-
-.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item {
-	font-size: var(--wp--preset--font-size--large);
-}
-
-/* A visually hidden first heading should not add block-gap space above the next section. */
-.screen-reader-text:first-child + * {
-	margin-block-start: 0;
-}
-
-/* Footer section list: plain, compact links that match the navigation column. */
-.shortlaxi-footer-list {
-	font-family: var(--wp--preset--font-family--sans);
+.shortlaxi-sidebar-categories {
 	font-size: var(--wp--preset--font-size--small);
-	font-weight: 600;
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
-.shortlaxi-footer-list li + li {
-	margin-top: var(--wp--preset--spacing--20);
-}
-
-.shortlaxi-footer-list a {
+.shortlaxi-sidebar-categories a {
+	align-items: center;
+	border-radius: var(--wp--custom--radius--small);
+	display: flex;
+	gap: 1.25rem;
+	padding: 0.5rem 0.75rem;
 	text-decoration: none;
 }
 
-.shortlaxi-footer-list a:hover,
-.shortlaxi-footer-list a:focus-visible {
+.shortlaxi-sidebar-categories a::before {
+	background: var(--wp--preset--color--contrast-2);
+	content: "";
+	flex-shrink: 0;
+	height: 1.125rem;
+	-webkit-mask: var(--shortlaxi-icon-hash) center / contain no-repeat;
+	mask: var(--shortlaxi-icon-hash) center / contain no-repeat;
+	width: 1.375rem;
+}
+
+.shortlaxi-sidebar-categories a:hover {
+	background: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--contrast);
+}
+
+.shortlaxi-sidebar-categories .current-cat > a {
+	background: var(--wp--preset--color--surface-2);
+	font-weight: 700;
+}
+
+.shortlaxi-sidebar-categories .current-cat > a::before {
+	background: var(--wp--preset--color--accent);
+}
+
+/* Collapsed desktop rail: icons with small labels, categories hidden. */
+@media (min-width: 64rem) {
+	.shortlaxi-sidebar-collapsed .shortlaxi-sidebar__inner {
+		padding-inline: 0.25rem;
+	}
+
+	.shortlaxi-sidebar-collapsed .shortlaxi-sidenav .wp-block-navigation-item__content {
+		flex-direction: column;
+		font-size: 0.6875rem;
+		gap: 0.375rem;
+		padding: 0.875rem 0.25rem;
+		text-align: center;
+	}
+
+	.shortlaxi-sidebar-collapsed .shortlaxi-sidebar__section {
+		display: none;
+	}
+}
+
+/* ------------------------------------------------------------------ *
+ * Main column and sections
+ * ------------------------------------------------------------------ */
+.shortlaxi-main {
+	padding-bottom: var(--wp--preset--spacing--60);
+	padding-top: var(--wp--preset--spacing--40);
+}
+
+.shortlaxi-main > * + * {
+	margin-block-start: var(--wp--preset--spacing--50);
+}
+
+.shortlaxi-main > .screen-reader-text + * {
+	margin-block-start: 0;
+}
+
+.shortlaxi-section__header {
+	margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.shortlaxi-section__title {
+	font-size: var(--wp--preset--font-size--large);
+	margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.shortlaxi-section__header .shortlaxi-section__title {
+	margin-bottom: 0;
+}
+
+.shortlaxi-section__title.is-trending {
+	align-items: center;
+	display: flex;
+	gap: 0.5rem;
+}
+
+.shortlaxi-section__title.is-trending::before {
+	background: var(--wp--preset--color--accent);
+	content: "";
+	height: 1.25em;
+	-webkit-mask: var(--shortlaxi-icon-trending) center / contain no-repeat;
+	mask: var(--shortlaxi-icon-trending) center / contain no-repeat;
+	width: 1.25em;
+}
+
+.shortlaxi-section__more {
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	margin: 0;
+}
+
+.shortlaxi-section__more a {
+	color: var(--wp--preset--color--accent);
+	text-decoration: none;
+}
+
+.shortlaxi-section__more a:hover {
 	text-decoration: underline;
 }
 
-/* Pagination numbers need breathing room to be tappable. */
+.shortlaxi-page-header .wp-block-query-title,
+.shortlaxi-page-header .wp-block-post-title {
+	font-size: var(--wp--preset--font-size--xx-large);
+}
+
+/* ------------------------------------------------------------------ *
+ * Category chips
+ * ------------------------------------------------------------------ */
+.shortlaxi-chips-bar {
+	background: var(--wp--preset--color--base);
+	position: sticky;
+	top: calc(var(--shortlaxi-header-h) + var(--shortlaxi-admin-bar));
+	z-index: 40;
+	padding-block: var(--wp--preset--spacing--20);
+}
+
+.shortlaxi-chips {
+	display: flex;
+	gap: 0.625rem;
+	list-style: none;
+	margin: 0;
+	-webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+	mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	padding: 0.25rem 2.5rem 0.25rem 0.125rem;
+	scroll-padding-inline: 1rem;
+	scrollbar-width: none;
+}
+
+.shortlaxi-chips::-webkit-scrollbar {
+	display: none;
+}
+
+.shortlaxi-chips > li {
+	flex-shrink: 0;
+}
+
+.shortlaxi-chip {
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--wp--custom--radius--small);
+	color: var(--wp--preset--color--contrast);
+	display: inline-flex;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	line-height: 1.2;
+	padding: 0.5rem 0.875rem;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.shortlaxi-chip:hover {
+	background: var(--wp--preset--color--surface-2);
+	color: var(--wp--preset--color--contrast);
+}
+
+.shortlaxi-chip[aria-current="page"],
+.shortlaxi-chip[aria-current="page"]:hover {
+	background: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--base);
+}
+
+/* ------------------------------------------------------------------ *
+ * Cards and grids
+ * ------------------------------------------------------------------ */
+.shortlaxi-grid,
+.shortlaxi-bookmarks__grid {
+	column-gap: var(--wp--preset--spacing--30) !important;
+	row-gap: var(--wp--preset--spacing--40) !important;
+}
+
+.shortlaxi-bookmarks__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr));
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.shortlaxi-bookmarks__grid[hidden] {
+	display: none;
+}
+
+.shortlaxi-card {
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--shortlaxi-radius);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.shortlaxi-card:hover {
+	background: var(--wp--preset--color--surface-2);
+	transform: translateY(-2px);
+}
+
+.shortlaxi-card > * {
+	margin-block: 0;
+}
+
+.shortlaxi-card__media,
+.shortlaxi-card__media img {
+	border-radius: 0 !important;
+	margin: 0;
+}
+
+.shortlaxi-card__media img {
+	aspect-ratio: 16 / 9;
+	display: block;
+	object-fit: cover;
+	width: 100%;
+}
+
+/* Stories without a featured image get a branded 16:9 placeholder so the grid stays even. */
+.shortlaxi-card:not(:has(.shortlaxi-card__media))::before {
+	aspect-ratio: 16 / 9;
+	background:
+		url(../images/mark.svg) center / 3rem auto no-repeat,
+		linear-gradient(135deg, var(--wp--preset--color--surface-2), var(--wp--preset--color--base));
+	content: "";
+	display: block;
+}
+
+.shortlaxi-card__body {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	padding: 0.875rem 1rem 0.75rem;
+}
+
+.shortlaxi-card__body > * {
+	margin-block: 0;
+}
+
+.shortlaxi-card__body > * + * {
+	margin-block-start: 0.5rem;
+}
+
+.shortlaxi-card__kicker,
+p.shortlaxi-card__kicker {
+	color: var(--wp--preset--color--accent);
+	font-size: var(--wp--preset--font-size--x-small);
+	font-weight: 700;
+	letter-spacing: var(--wp--custom--letter-spacing--kicker);
+	text-transform: uppercase;
+}
+
+.shortlaxi-card .shortlaxi-card__title {
+	-webkit-box-orient: vertical;
+	display: -webkit-box;
+	font-size: var(--wp--preset--font-size--medium);
+	font-weight: 650;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	line-height: var(--wp--custom--line-height--snug);
+	overflow: hidden;
+}
+
+.shortlaxi-card__title a {
+	color: var(--wp--preset--color--contrast);
+	/* Core makes this inline-block, which defeats the two-line clamp. */
+	display: inline;
+	text-decoration: none;
+}
+
+/* The title link covers the whole card; category and bookmark controls sit above it. */
+.shortlaxi-card__title a::after {
+	content: "";
+	inset: 0;
+	position: absolute;
+	z-index: 0;
+}
+
+.shortlaxi-card__title a:focus-visible {
+	outline: none;
+}
+
+.shortlaxi-card:has(.shortlaxi-card__title a:focus-visible) {
+	outline: 2px solid var(--wp--preset--color--accent);
+	outline-offset: 2px;
+}
+
+.shortlaxi-card .wp-block-post-terms a,
+.shortlaxi-card button {
+	position: relative;
+	z-index: 1;
+}
+
+.shortlaxi-card__excerpt,
+.shortlaxi-card__excerpt p,
+p.shortlaxi-card__excerpt {
+	-webkit-box-orient: vertical;
+	color: var(--wp--preset--color--contrast-2);
+	display: -webkit-box;
+	font-size: var(--wp--preset--font-size--small);
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	line-height: 1.5;
+	margin: 0;
+	overflow: hidden;
+}
+
+.shortlaxi-card__excerpt .wp-block-post-excerpt__more-text {
+	display: none;
+}
+
+.shortlaxi-card__meta {
+	align-items: center;
+	color: var(--wp--preset--color--contrast-2);
+	font-size: var(--wp--preset--font-size--x-small);
+	gap: 0.5rem;
+	margin-top: auto !important;
+	padding-top: 0.5rem;
+}
+
+.shortlaxi-meta > * + *::before {
+	content: "\00B7";
+	margin-inline-end: 0.375em;
+}
+
+/* Ranked lists (Trending): numbered badge on each card. */
+.is-ranked {
+	counter-reset: shortlaxi-rank;
+}
+
+.is-ranked > li {
+	counter-increment: shortlaxi-rank;
+	position: relative;
+}
+
+.is-ranked > li::before {
+	align-items: center;
+	background: var(--wp--preset--color--accent);
+	border-radius: var(--wp--custom--radius--pill);
+	box-shadow: 0 2px 8px rgb(0 0 0 / 0.4);
+	color: var(--wp--preset--color--base);
+	content: counter(shortlaxi-rank);
+	display: flex;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 800;
+	height: 2rem;
+	justify-content: center;
+	left: 0.625rem;
+	pointer-events: none;
+	position: absolute;
+	top: 0.625rem;
+	width: 2rem;
+	z-index: 2;
+}
+
+/* ------------------------------------------------------------------ *
+ * Featured story
+ * ------------------------------------------------------------------ */
+.shortlaxi-featured {
+	container-type: inline-size;
+}
+
+.shortlaxi-hero {
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--wp--custom--radius--large);
+	overflow: hidden;
+	position: relative;
+}
+
+.shortlaxi-hero > * {
+	margin-block: 0;
+}
+
+.shortlaxi-hero__media,
+.shortlaxi-hero__media img {
+	border-radius: 0 !important;
+	height: 100%;
+	margin: 0;
+}
+
+.shortlaxi-hero__media img {
+	object-fit: cover;
+	width: 100%;
+}
+
+.shortlaxi-hero__body {
+	padding: var(--wp--preset--spacing--40);
+}
+
+.shortlaxi-hero__body > * {
+	margin-block: 0;
+}
+
+.shortlaxi-hero__body > * + * {
+	margin-block-start: var(--wp--preset--spacing--30);
+}
+
+.shortlaxi-hero .wp-block-post-title a {
+	color: var(--wp--preset--color--contrast);
+}
+
+.shortlaxi-hero .wp-block-post-title a::after {
+	content: "";
+	inset: 0;
+	position: absolute;
+	z-index: 0;
+}
+
+.shortlaxi-hero .wp-block-post-title a:focus-visible {
+	outline: none;
+}
+
+.shortlaxi-hero:has(.wp-block-post-title a:focus-visible) {
+	outline: 2px solid var(--wp--preset--color--accent);
+	outline-offset: 2px;
+}
+
+.shortlaxi-hero .wp-block-post-terms a,
+.shortlaxi-hero .wp-block-post-author-name a,
+.shortlaxi-hero .wp-block-read-more {
+	position: relative;
+	z-index: 1;
+}
+
+.shortlaxi-label {
+	border: 1px solid var(--wp--preset--color--accent);
+	border-radius: var(--wp--custom--radius--pill);
+	color: var(--wp--preset--color--accent);
+	display: inline-block;
+	font-size: var(--wp--preset--font-size--x-small);
+	font-weight: 700;
+	letter-spacing: var(--wp--custom--letter-spacing--kicker);
+	padding: 0.25rem 0.625rem;
+	text-transform: uppercase;
+}
+
+.shortlaxi-button.wp-block-read-more,
+.wp-block-read-more.shortlaxi-button {
+	background: var(--wp--preset--color--accent);
+	border-radius: var(--wp--custom--radius--pill);
+	color: var(--wp--preset--color--base);
+	display: inline-block;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 700;
+	padding: 0.625rem 1.25rem;
+	text-decoration: none;
+	width: auto;
+}
+
+.shortlaxi-button.wp-block-read-more:hover {
+	background: var(--wp--preset--color--contrast);
+	color: var(--wp--preset--color--base);
+}
+
+@container (min-width: 46rem) {
+	.shortlaxi-hero {
+		align-items: center;
+		display: grid;
+		grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+	}
+
+	.shortlaxi-hero__media img {
+		aspect-ratio: 16 / 9;
+	}
+}
+
+/* ------------------------------------------------------------------ *
+ * Bylines, bookmark button, pagination
+ * ------------------------------------------------------------------ */
+.shortlaxi-byline .wp-block-avatar img {
+	background: var(--wp--preset--color--surface-2);
+	border-radius: 50%;
+	color: transparent;
+	display: block;
+	font-size: 0;
+	overflow: hidden;
+}
+
+.shortlaxi-byline .wp-block-post-author-name a {
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
+}
+
+.shortlaxi-byline .wp-block-post-author-name a:hover {
+	text-decoration: underline;
+}
+
+.wp-block-shortlaxi-bookmark-button {
+	align-items: center;
+	background: transparent;
+	border: 0;
+	border-radius: var(--wp--custom--radius--pill);
+	color: var(--wp--preset--color--contrast-2);
+	cursor: pointer;
+	display: inline-flex;
+	flex-shrink: 0;
+	font: inherit;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	gap: 0.375rem;
+	height: 2.25rem;
+	justify-content: center;
+	min-width: 2.25rem;
+	padding: 0;
+}
+
+.wp-block-shortlaxi-bookmark-button[hidden] {
+	display: none;
+}
+
+.wp-block-shortlaxi-bookmark-button:hover {
+	background: var(--wp--preset--color--surface-2);
+	color: var(--wp--preset--color--contrast);
+}
+
+.wp-block-shortlaxi-bookmark-button[aria-pressed="true"] {
+	color: var(--wp--preset--color--accent);
+}
+
+.wp-block-shortlaxi-bookmark-button[aria-pressed="true"] svg {
+	fill: currentColor;
+}
+
+.wp-block-shortlaxi-bookmark-button.has-label {
+	background: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--contrast);
+	padding: 0 1rem 0 0.75rem;
+}
+
+.wp-block-shortlaxi-bookmark-button.has-label:hover {
+	background: var(--wp--preset--color--surface-2);
+}
+
+.wp-block-shortlaxi-bookmark-button.has-label[aria-pressed="true"] {
+	color: var(--wp--preset--color--accent);
+}
+
+.wp-block-query-pagination {
+	gap: var(--wp--preset--spacing--20);
+	margin-top: var(--wp--preset--spacing--50);
+}
+
 .wp-block-query-pagination-numbers {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--wp--preset--spacing--20);
+	gap: 0.375rem;
 }
 
-.wp-block-query-pagination-numbers .page-numbers {
+.wp-block-query-pagination a,
+.wp-block-query-pagination .page-numbers {
+	align-items: center;
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--wp--custom--radius--pill);
+	color: var(--wp--preset--color--contrast);
+	display: inline-flex;
+	justify-content: center;
+	min-height: 2.75rem;
 	min-width: 2.75rem;
-	padding: 0.5rem 0;
-	text-align: center;
+	padding: 0 1rem;
+	text-decoration: none;
 }
 
-/* Search block: square edges to match buttons. */
-.wp-block-search__input {
-	border-radius: 0;
+.wp-block-query-pagination .page-numbers {
+	padding: 0 0.5rem;
 }
 
+.wp-block-query-pagination a:hover {
+	background: var(--wp--preset--color--surface-2);
+	color: var(--wp--preset--color--contrast);
+}
+
+.wp-block-query-pagination .page-numbers.current {
+	background: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--base);
+}
+
+.wp-block-query-pagination .page-numbers.dots {
+	background: transparent;
+}
+
+/* ------------------------------------------------------------------ *
+ * Article
+ * ------------------------------------------------------------------ */
+.shortlaxi-article__media.alignwide {
+	max-width: min(100%, 68rem);
+}
+
+.shortlaxi-article__media img {
+	border-radius: var(--wp--custom--radius--large);
+}
+
+.shortlaxi-article__header > * {
+	margin-block: 0;
+}
+
+.shortlaxi-article__header > * + * {
+	margin-block-start: var(--wp--preset--spacing--30);
+}
+
+.shortlaxi-article__bar {
+	align-items: center;
+	border-bottom: 1px solid var(--wp--preset--color--border);
+	padding-bottom: var(--wp--preset--spacing--30);
+}
+
+.shortlaxi-prose {
+	color: color-mix(in srgb, var(--wp--preset--color--contrast) 92%, var(--wp--preset--color--contrast-2));
+}
+
+.shortlaxi-prose :where(h2, h3, h4) {
+	color: var(--wp--preset--color--contrast);
+	font-family: var(--wp--preset--font-family--sans);
+	margin-block-start: 2.25em;
+}
+
+.shortlaxi-prose :where(h2) {
+	font-size: var(--wp--preset--font-size--x-large);
+}
+
+.shortlaxi-prose :where(h3) {
+	font-size: var(--wp--preset--font-size--large);
+}
+
+.shortlaxi-prose :where(ul, ol) {
+	padding-inline-start: 1.25em;
+}
+
+.shortlaxi-prose li + li {
+	margin-top: 0.4em;
+}
+
+.shortlaxi-prose :where(figure, .wp-block-image) img {
+	border-radius: var(--shortlaxi-radius);
+}
+
+.shortlaxi-prose .wp-block-pullquote {
+	text-align: start;
+}
+
+/* Table of contents. */
+.wp-block-shortlaxi-toc {
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--shortlaxi-radius);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.shortlaxi-toc__summary {
+	align-items: center;
+	cursor: pointer;
+	display: flex;
+	font-weight: 700;
+	gap: 0.625rem;
+	list-style: none;
+	padding: 0.875rem 1rem;
+}
+
+.shortlaxi-toc__summary::-webkit-details-marker {
+	display: none;
+}
+
+.shortlaxi-toc__summary::after {
+	border-bottom: 2px solid currentColor;
+	border-right: 2px solid currentColor;
+	content: "";
+	height: 0.5rem;
+	margin-inline-start: auto;
+	transform: rotate(45deg) translateY(-2px);
+	transition: transform 0.2s ease;
+	width: 0.5rem;
+}
+
+.shortlaxi-toc__details[open] .shortlaxi-toc__summary::after {
+	transform: rotate(-135deg) translateY(-2px);
+}
+
+.shortlaxi-toc__summary .shortlaxi-icon {
+	color: var(--wp--preset--color--accent);
+}
+
+.shortlaxi-toc__count {
+	color: var(--wp--preset--color--contrast-2);
+	font-weight: 400;
+}
+
+.shortlaxi-toc__list {
+	border-top: 1px solid var(--wp--preset--color--border);
+	list-style: none;
+	margin: 0;
+	padding: 0.75rem 1rem 1rem;
+}
+
+.shortlaxi-toc__item a {
+	border-inline-start: 2px solid var(--wp--preset--color--border);
+	color: var(--wp--preset--color--contrast-2);
+	display: block;
+	padding: 0.375rem 0 0.375rem 0.875rem;
+	text-decoration: none;
+}
+
+.shortlaxi-toc__item a:hover {
+	border-color: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--contrast);
+}
+
+.shortlaxi-toc__item.is-level-3 a {
+	padding-inline-start: 1.75rem;
+}
+
+/* Share controls. */
+.shortlaxi-share__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.shortlaxi-share__list > li[hidden] {
+	display: none;
+}
+
+.shortlaxi-share__button {
+	align-items: center;
+	background: var(--wp--preset--color--surface);
+	border: 0;
+	border-radius: var(--wp--custom--radius--pill);
+	color: var(--wp--preset--color--contrast);
+	cursor: pointer;
+	display: inline-flex;
+	font: inherit;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	gap: 0.5rem;
+	min-height: 2.25rem;
+	padding: 0 1rem 0 0.75rem;
+	text-decoration: none;
+}
+
+.shortlaxi-share__button:hover {
+	background: var(--wp--preset--color--surface-2);
+	color: var(--wp--preset--color--contrast);
+}
+
+.shortlaxi-share__button .shortlaxi-icon {
+	color: var(--wp--preset--color--accent);
+}
+
+.shortlaxi-share__button.is-done {
+	background: var(--wp--preset--color--accent);
+	color: var(--wp--preset--color--base);
+}
+
+.shortlaxi-share__button.is-done .shortlaxi-icon {
+	color: inherit;
+}
+
+/* Compact share row next to the byline: icon buttons; labels stay available to screen readers. */
+.wp-block-shortlaxi-share.is-style-compact .shortlaxi-share__button {
+	justify-content: center;
+	padding: 0;
+	width: 2.25rem;
+}
+
+.wp-block-shortlaxi-share.is-style-compact .shortlaxi-share__button > span:not(.screen-reader-text) {
+	clip: rect(1px, 1px, 1px, 1px);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+/* Sources and references, footnotes, tags. */
+.shortlaxi-sources,
+.shortlaxi-prose .wp-block-footnotes {
+	border-top: 1px solid var(--wp--preset--color--border);
+	color: var(--wp--preset--color--contrast-2);
+	font-family: var(--wp--preset--font-family--sans);
+	font-size: var(--wp--preset--font-size--small);
+	line-height: 1.6;
+	padding-top: var(--wp--preset--spacing--30);
+}
+
+.shortlaxi-sources h2 {
+	font-size: var(--wp--preset--font-size--medium);
+	margin-block-start: 0;
+}
+
+.shortlaxi-sources a {
+	color: var(--wp--preset--color--accent);
+	overflow-wrap: anywhere;
+}
+
+.shortlaxi-article .wp-block-post-terms.taxonomy-post_tag {
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+.shortlaxi-article .wp-block-post-terms.taxonomy-post_tag a {
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--wp--custom--radius--pill);
+	color: var(--wp--preset--color--contrast);
+	display: inline-block;
+	font-weight: 600;
+	margin: 0.125rem 0;
+	padding: 0.25rem 0.75rem;
+}
+
+.shortlaxi-article .wp-block-post-terms.taxonomy-post_tag .wp-block-post-terms__separator {
+	display: none;
+}
+
+.shortlaxi-article .wp-block-post-terms.taxonomy-post_tag a + a,
+.shortlaxi-article .wp-block-post-terms.taxonomy-post_tag .wp-block-post-terms__separator + a {
+	margin-inline-start: 0.375rem;
+}
+
+.shortlaxi-related,
+.shortlaxi-discussion {
+	border-top: 1px solid var(--wp--preset--color--border);
+	padding-top: var(--wp--preset--spacing--50);
+}
+
+/* Author box and comments. */
+.shortlaxi-author-box {
+	border-radius: var(--shortlaxi-radius);
+}
+
+:where(.wp-block-post-comments-form, .comment-form) :where(input:not([type="submit"], [type="checkbox"]), textarea) {
+	background: var(--wp--preset--color--base-2);
+	border: 1px solid var(--wp--preset--color--outline);
+	border-radius: var(--wp--custom--radius--small);
+	color: var(--wp--preset--color--contrast);
+	padding: 0.625rem 0.75rem;
+}
+
+/* Avatars: round, and a failed image shows a quiet disc instead of spilling its alt text. */
+.wp-block-avatar img,
+.wp-block-post-author__avatar img {
+	background: var(--wp--preset--color--surface-2);
+	border-radius: 50%;
+	color: transparent;
+	font-size: 0;
+	overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ *
+ * Explore topics and bookmarks
+ * ------------------------------------------------------------------ */
+.shortlaxi-topic {
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--shortlaxi-radius);
+	height: 100%;
+	padding: var(--wp--preset--spacing--40);
+	position: relative;
+}
+
+.shortlaxi-topic > * {
+	margin-block: 0;
+}
+
+.shortlaxi-topic > * + * {
+	margin-block-start: 0.5rem;
+}
+
+.shortlaxi-topic .wp-block-term-name a {
+	color: var(--wp--preset--color--contrast);
+	text-decoration: none;
+}
+
+.shortlaxi-topic .wp-block-term-name a::after {
+	content: "";
+	inset: 0;
+	position: absolute;
+}
+
+.shortlaxi-topic:hover {
+	background: var(--wp--preset--color--surface-2);
+}
+
+.shortlaxi-topic:has(a:focus-visible) {
+	outline: 2px solid var(--wp--preset--color--accent);
+	outline-offset: 2px;
+}
+
+.shortlaxi-topic .wp-block-term-name a:focus-visible {
+	outline: none;
+}
+
+.shortlaxi-topic .wp-block-term-description,
+.shortlaxi-topic .wp-block-term-count {
+	color: var(--wp--preset--color--contrast-2);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.shortlaxi-topic-grid {
+	list-style: none;
+	padding: 0;
+}
+
+.shortlaxi-bookmarks__empty {
+	background: var(--wp--preset--color--surface);
+	border-radius: var(--shortlaxi-radius);
+	color: var(--wp--preset--color--contrast-2);
+	padding: var(--wp--preset--spacing--40);
+}
+
+.shortlaxi-bookmarks__empty[hidden] {
+	display: none;
+}
+
+.shortlaxi-bookmarks__empty p {
+	margin: 0;
+}
+
+/* The home-page shelf only appears once the reader has saved something (or follows #bookmarks). */
+.shortlaxi-bookmarks-shelf:has(.hide-when-empty.is-empty):not(:target) {
+	display: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * Footer
+ * ------------------------------------------------------------------ */
+.shortlaxi-footer {
+	border-top: 1px solid var(--wp--preset--color--border);
+}
+
+.shortlaxi-footer-nav a:hover {
+	color: var(--wp--preset--color--accent);
+}
+
+/* ------------------------------------------------------------------ *
+ * Editor
+ * ------------------------------------------------------------------ */
+.shortlaxi-editor-placeholder {
+	border: 1px dashed var(--wp--preset--color--outline);
+	border-radius: var(--shortlaxi-radius);
+	display: flex;
+	flex-direction: column;
+	font-size: var(--wp--preset--font-size--small);
+	gap: 0.25rem;
+	padding: 0.75rem 1rem;
+}
+
+.shortlaxi-editor-placeholder span {
+	color: var(--wp--preset--color--contrast-2);
+}
+
+/* ------------------------------------------------------------------ *
+ * Motion
+ * ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
@@ -124,5 +1374,9 @@ img {
 		animation-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
 		transition-duration: 0.01ms !important;
+	}
+
+	.shortlaxi-card:hover {
+		transform: none;
 	}
 }

@@ -1,9 +1,19 @@
-<!-- wp:template-part {"slug":"header","area":"header","tagName":"header"} /-->
+<!-- wp:template-part {"slug":"header","area":"header","tagName":"header","className":"shortlaxi-header"} /-->
 
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group">
-	<!-- wp:post-content {"align":"full","layout":{"type":"constrained"}} /-->
-</main>
+<!-- wp:group {"className":"shortlaxi-shell","layout":{"type":"default"}} -->
+<div class="wp-block-group shortlaxi-shell">
+	<!-- wp:template-part {"slug":"sidebar","tagName":"aside","className":"shortlaxi-sidebar"} /-->
+
+	<!-- wp:group {"className":"shortlaxi-content","layout":{"type":"default"}} -->
+	<div class="wp-block-group shortlaxi-content">
+		<!-- wp:group {"tagName":"main","className":"shortlaxi-main","layout":{"type":"constrained"}} -->
+		<main class="wp-block-group shortlaxi-main">
+			<!-- wp:post-content {"align":"full","layout":{"type":"constrained"}} /-->
+		</main>
+		<!-- /wp:group -->
+
+		<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->
+	</div>
+	<!-- /wp:group -->
+</div>
 <!-- /wp:group -->
-
-<!-- wp:template-part {"slug":"footer","area":"footer","tagName":"footer"} /-->

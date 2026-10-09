@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "shortlaxi/toc",
+	"title": "Table of Contents",
+	"category": "theme",
+	"description": "Lists the article's H2 and H3 headings. Hidden on short articles.",
+	"keywords": [ "contents", "toc", "headings" ],
+	"textdomain": "shortlaxi",
+	"usesContext": [ "postId" ],
+	"attributes": {
+		"minHeadings": { "type": "integer", "default": 3 }
+	},
+	"supports": {
+		"html": false,
+		"spacing": { "margin": true },
+		"interactivity": { "clientNavigation": true }
+	},
+	"editorScript": "shortlaxi-editor-blocks",
+	"render": "file:./render.php"
+}

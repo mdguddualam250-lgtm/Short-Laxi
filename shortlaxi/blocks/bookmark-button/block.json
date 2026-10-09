@@ -1,0 +1,20 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "shortlaxi/bookmark-button",
+	"title": "Bookmark Button",
+	"category": "theme",
+	"description": "Lets readers save a story to their bookmarks in this browser.",
+	"keywords": [ "save", "bookmark", "read later" ],
+	"textdomain": "shortlaxi",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {
+		"showLabel": { "type": "boolean", "default": false }
+	},
+	"supports": {
+		"html": false,
+		"interactivity": { "clientNavigation": true }
+	},
+	"editorScript": "shortlaxi-editor-blocks",
+	"render": "file:./render.php"
+}

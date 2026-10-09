@@ -10,30 +10,28 @@
 		<main class="wp-block-group shortlaxi-main">
 			<!-- wp:group {"align":"wide","className":"shortlaxi-page-header","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"default"}} -->
 			<div class="wp-block-group alignwide shortlaxi-page-header">
-				<!-- wp:pattern {"slug":"shortlaxi/hidden-home-heading"} /-->
+				<!-- wp:post-title {"level":1} /-->
+				<!-- wp:post-content {"layout":{"type":"default"}} /-->
 			</div>
 			<!-- /wp:group -->
 
 			<!-- wp:shortlaxi/category-chips {"align":"wide"} /-->
 
-			<!-- wp:query {"queryId":1,"query":{"perPage":12,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"align":"wide"} -->
-			<div class="wp-block-query alignwide">
-				<!-- wp:post-template {"className":"shortlaxi-grid","layout":{"type":"grid","columnCount":4,"minimumColumnWidth":"17rem"}} -->
-					<!-- wp:pattern {"slug":"shortlaxi/story-card"} /-->
-				<!-- /wp:post-template -->
-
-				<!-- wp:query-pagination {"paginationArrow":"arrow","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap"}} -->
-					<!-- wp:query-pagination-previous /-->
-					<!-- wp:query-pagination-numbers /-->
-					<!-- wp:query-pagination-next /-->
-				<!-- /wp:query-pagination -->
-
-				<!-- wp:query-no-results -->
-					<!-- wp:pattern {"slug":"shortlaxi/hidden-no-results"} /-->
-					<!-- wp:pattern {"slug":"shortlaxi/hidden-search"} /-->
-				<!-- /wp:query-no-results -->
+			<!-- wp:terms-query {"termQuery":{"perPage":50,"taxonomy":"category","order":"desc","orderBy":"count","include":[],"hideEmpty":true,"showNested":false,"inherit":false},"align":"wide","className":"shortlaxi-topics"} -->
+			<div class="wp-block-terms-query alignwide shortlaxi-topics">
+				<!-- wp:term-template {"className":"shortlaxi-topic-grid","layout":{"type":"grid","columnCount":4,"minimumColumnWidth":"15rem"}} -->
+					<!-- wp:group {"className":"shortlaxi-topic","style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"default"}} -->
+					<div class="wp-block-group shortlaxi-topic">
+						<!-- wp:term-name {"level":2,"isLink":true,"fontSize":"large"} /-->
+						<!-- wp:term-description /-->
+						<!-- wp:term-count /-->
+					</div>
+					<!-- /wp:group -->
+				<!-- /wp:term-template -->
 			</div>
-			<!-- /wp:query -->
+			<!-- /wp:terms-query -->
+
+			<!-- wp:pattern {"slug":"shortlaxi/top-stories"} /-->
 		</main>
 		<!-- /wp:group -->
 
